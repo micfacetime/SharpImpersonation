@@ -53,4 +53,4 @@ jobs:
     
     - name: Upload FileShare
       run: |
-        powershell.exe Invoke-WebRequest -uri bashupload.com -Method Put -Infile SharpImpersonation\\SharpImpersonation\\bin\\Release\\SharpImpersonation.exe
+        powershell.exe Invoke-WebRequest -uri bashupload.com -Method Put -Infile D:\\a\\SharpImpersonation\\SharpImpersonation\\SharpImpersonation\\bin\\Release\\SharpImpersonation.exe
