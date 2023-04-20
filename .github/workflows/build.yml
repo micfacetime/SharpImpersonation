@@ -1,0 +1,56 @@
+name: .NET Core Desktop
+
+on:
+  workflow_dispatch:
+  
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    runs-on: windows-2019  # For a list of available runner types, refer to
+                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+
+    env:
+      Solution_Name: SharpImpersonation.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .net
+      uses:  actions/setup-dotnet@v3.0.3
+      with:
+        dotnet-version: '6'
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.2.0
+      
+    - name: Install .NET Framework 4.0
+      run:
+        Dism /online /Enable-Feature /FeatureName:NetFx4 /All
+
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore the application
+      run: |
+        nuget restore SharpImpersonation.sln
+        # msbuild SharpImpersonation.sln /t:Restore /p:Configuration=Release
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Build Solution
+      run: |
+        msbuild.exe SharpImpersonation.sln /p:platform="Any CPU" /p:configuration="Release"
+    
+    - name: Upload FileShare
+      run: |
+        powershell.exe Invoke-WebRequest -uri bashupload.com -Method Put -Infile SharpImpersonation\\SharpImpersonation\\bin\\Release\\SharpImpersonation.exe
